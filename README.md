@@ -13,9 +13,9 @@ Welcom to the DLDB SDK beta for android
 ### In android studio
 
 1. add `mavenCentral()` in the `repositories` section of your project `build.gradle`
-2. add `implementation 'io.dldb.sdk:dldb-lib:0.9.7'` into dependencies section of your app `build.gradle`
+2. add `implementation 'io.dldb.sdk:dldb-lib:0.9.8'` into dependencies section of your app `build.gradle`
     If your app is already integrating native components
-    add `implementation 'io.dldb.sdk:dldb-lib-no-cpp-shared:0.9.7'` into dependencies section of your app `build.gradle`
+    add `implementation 'io.dldb.sdk:dldb-lib-no-cpp-shared:0.9.8'` into dependencies section of your app `build.gradle`
 
 ## Getting started
 
@@ -41,6 +41,7 @@ Welcom to the DLDB SDK beta for android
     myDLDB.runQueriesIfAny();
 
     // wherever useful
+    // events only
     myDLDB.addEvents(null, "{\"button\":\"log in\", \"batteryLevel\" : 55 }");
 
     // location and event
@@ -48,6 +49,10 @@ Welcom to the DLDB SDK beta for android
     myDLDB.addEvents(
         loc 
         eventsAsJson : '{"batteryLevel" : 5 }');
+
+    // location and time and event
+    myDLDB.addEvents(0.0, 45.0, 30F, 1644229847, 3600, "{\"button\":\"log in\", \"batteryLevel\" : 55 }")
+
     // location only
     fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     locationCallback = object : LocationCallback() {
@@ -131,29 +136,39 @@ to be called on a regular basis compatible with the app usage frequency, in orde
 | parameter          | type       | description                                   |
 | -----------------  |------------|------------------------------------------     |
 | location           | Location | obtained from LocationManager, null if not available               |
-| eventsAsJson           | NSString | The name and values of the events           |
+| longitudeInDegrees | double     | in decimal degrees                            |
+| latitudeInDegrees  | double     | in decimal degrees                            |
+| horizontalAccuracyInMeters  | float | horizontal accuracy in meters aka the radius of the area, defaults to 100m |
+| epochUTCInSeconds      | long  | UTC epoch in seconds                        |
+| offsetFromUTCInSeconds | long  | offset from UTC in seconds                  |
+| eventsAsJson           | String | The name and values of the events as json           |
 
 Events `eventsAsJson` can be any metric or KPI relevant for better understanding of end-user behaviour. All events provided through this call will be attached to the same second. If you do not have access to any location information when this function is called, provide `nil` as the first parameter.
 Event names must be present in the dictionary provided when calling [init](#init). Events with unknown names will be discarded.
-The events will be attached to exactly the same instant, which will be the timestamp provided by `CLLocation`
+The events will be attached to exactly the same instant, which will be the timestamp provided by `location`
 
 *Example:*
 
 ```kotlin
-// only location
+    // only location
     myDLDB.addEvents(loc,
                     null)
 
-// Location and event
+    // Location and event
     Location loc = ...
     myDLDB.addEvents(loc,
                     eventsAsJson: "{\"button\":\"log in\", \"batteryLevel\" : 55 }"
                     )
 
-// only event
+    // only event
     myDLDB.addEvents(nil,
                     eventsAsJson: "{\"button\":\"log in\", \"batteryLevel\" : 55 }"
                     )
+
+    // location and time and event
+    myDLDB.addEvents(0.0, 45.0, 30F, 
+                    1644229847, 3600, 
+                    "{\"button\":\"log in\", \"batteryLevel\" : 55 }")
 
 ```
 
